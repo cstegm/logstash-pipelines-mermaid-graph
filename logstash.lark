@@ -1,0 +1,51 @@
+start: ifo+
+
+ifo: WORD "{" ifocontent* "}"
+
+ifocontent: 
+    | condition
+    | plugin
+
+condition: COND [expr] "{" [content*] "}" 
+
+expr: ["!"] value op value [BOOL] 
+
+?op: OP
+
+?content:
+    | plugin
+    | condition
+
+plugin: WORD "{" pair* "}"
+
+array  : "[" [value ("," value)*] "]"
+hash : "{" [pair ("," pair)*] "}"
+pair   : key "=>" value
+
+?key: STRING
+?value: 
+    | hash
+    | array
+    | STRING
+    | ESCAPED_STRING 
+    | pair
+    | NUMBER
+    | "true"             -> true
+    | "false"            -> false
+    | "null"             -> null
+
+OP: /(==|!=|<|>|<=|>=|~=|=~|!~|in|not in)/
+STRING: /\"?\[?[0-9a-zA-Z-_+]+\]?\"?/
+
+COND: /(if|else if|else)/
+BOOL: /(and|or|nand|xor)/ 
+ALL: /.+/
+COMMENT : /#.*/
+
+
+%import common.WORD
+%import common.NUMBER
+%import common.WS
+%import common.ESCAPED_STRING
+%ignore WS
+%ignore COMMENT
